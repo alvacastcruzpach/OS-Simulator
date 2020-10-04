@@ -34,7 +34,7 @@ public class CreadorProcesos {
             Integer prioridad = (int)((Math.random())*4+1); //Acá debe implementarse un random
             Integer tick_de_llegada = (int)(Math.random()*100); //Acá debe implementarse un random
             Integer burst_time = (int)((Math.random()*30)+1); //Acá debe implementarse un random
-            Integer tamaño = (int)((Math.random()*256)+1);
+            Integer tamaño = (int)((Math.random()*496)+1);
             String condicion = "Correcto";
             Double porcentaje_datos = (Math.random()*0.5) + 0.3;
             Integer interrupciones = (int)(15*(burst_time/30 + tamaño/256*0.7 + Math.random())/3)+5;

@@ -128,24 +128,25 @@ public class AdministradorDeMemoria {
             proceso.getPcb().setProgram_counter(proceso.getPcb().getDireccion_inicial() + (int)(proceso.getPcb().getTamaño()*proceso.getPcb().getPorcentaje_segmento_datos()));
             if(proceso.getPcb().getEstado() == "Bloqueado" && tick != proceso.getPcb().getTick_de_llegada()){
                 proceso.getPcb().setEstado("Listo");
-                Object[] miTabla = new Object[12];
-                miTabla[0]=tick;
-                miTabla[1]=proceso.getPid();
-                miTabla[2]=proceso.getPcb().getEstado();
-                miTabla[3]=proceso.getPcb().getPrioridad();
-                miTabla[4]=proceso.getPcb().getTick_de_llegada();
-                miTabla[5]=proceso.getBurst_time();
-                miTabla[6]=proceso.getPcb().getTamaño();
-                miTabla[7]=proceso.getPcb().getNumero_interrupciones();
-                miTabla[8]=proceso.getPcb().getCondicion();
-                miTabla[9]=proceso.getPcb().getDireccion_inicial();
+                Object[] miTabla = new Object[13];
+                miTabla[0]=proceso.getCorrida();
+                miTabla[1]=tick;
+                miTabla[2]=proceso.getPid();
+                miTabla[3]=proceso.getPcb().getEstado();
+                miTabla[4]=proceso.getPcb().getPrioridad();
+                miTabla[5]=proceso.getPcb().getTick_de_llegada();
+                miTabla[6]=proceso.getBurst_time();
+                miTabla[7]=proceso.getPcb().getTamaño();
+                miTabla[8]=proceso.getPcb().getNumero_interrupciones();
+                miTabla[9]=proceso.getPcb().getCondicion();
+                miTabla[10]=proceso.getPcb().getDireccion_inicial();
                 Integer fin1 = null;
                 if(proceso.getPcb().getDireccion_inicial()!=null){
                     fin1 = (Integer) proceso.getPcb().getDireccion_inicial() + (Integer) proceso.getPcb().getTamaño();
-                    miTabla[10]= fin1;
+                    miTabla[11]= fin1;
                 }
-                miTabla[10] = fin1;
-                miTabla[11]=proceso.getPcb().getProgram_counter();
+                miTabla[11] = fin1;
+                miTabla[12]=proceso.getPcb().getProgram_counter();
                 modelo.addRow(miTabla);
                 verprocesos.tbColaProcesos.setModel(modelo);
             }
@@ -162,24 +163,25 @@ public class AdministradorDeMemoria {
             }
         }else{
             proceso.getPcb().setEstado("Bloqueado");
-            Object[] miTabla = new Object[12];
-            miTabla[0]=tick;
-            miTabla[1]=proceso.getPid();
-            miTabla[2]=proceso.getPcb().getEstado();
-            miTabla[3]=proceso.getPcb().getPrioridad();
-            miTabla[4]=proceso.getPcb().getTick_de_llegada();
-            miTabla[5]=proceso.getBurst_time();
-            miTabla[6]=proceso.getPcb().getTamaño();
-            miTabla[7]=proceso.getPcb().getNumero_interrupciones();
-            miTabla[8]=proceso.getPcb().getCondicion();
-            miTabla[9]=proceso.getPcb().getDireccion_inicial();
+            Object[] miTabla = new Object[13];
+            miTabla[0]=proceso.getCorrida();
+            miTabla[1]=tick;
+            miTabla[2]=proceso.getPid();
+            miTabla[3]=proceso.getPcb().getEstado();
+            miTabla[4]=proceso.getPcb().getPrioridad();
+            miTabla[5]=proceso.getPcb().getTick_de_llegada();
+            miTabla[6]=proceso.getBurst_time();
+            miTabla[7]=proceso.getPcb().getTamaño();
+            miTabla[8]=proceso.getPcb().getNumero_interrupciones();
+            miTabla[9]=proceso.getPcb().getCondicion();
+            miTabla[10]=proceso.getPcb().getDireccion_inicial();
             Integer fin1 = null;
             if(proceso.getPcb().getDireccion_inicial()!=null){
                 fin1 = (Integer) proceso.getPcb().getDireccion_inicial() + (Integer) proceso.getPcb().getTamaño();
-                miTabla[10]= fin1;
+                miTabla[11]= fin1;
             }
-            miTabla[10] = fin1;
-            miTabla[11]=proceso.getPcb().getProgram_counter();
+            miTabla[11] = fin1;
+            miTabla[12]=proceso.getPcb().getProgram_counter();
             modelo.addRow(miTabla);
             verprocesos.tbColaProcesos.setModel(modelo);
             System.out.println("Proceso " + proceso.getPid() + " en espera a que haya espacio en memoria");
@@ -213,20 +215,65 @@ public class AdministradorDeMemoria {
         return busqueda;
     }
     
-    public Integer contarHuecos(MapaDeBits mapa, MemoriaPrincipal memoria){
+    public Integer contarHuecos(VerMemoria vermemoria, DefaultTableModel modelomem, DefaultTableModel modelocap, MapaDeBits mapa, MemoriaPrincipal memoria, Integer tick){
         Integer huecos = 0;
+        Integer iniciox = 0;
+        Integer finx = 0;
+        Integer inicioy = 0;
+        Integer finy = 0;
+        Integer lleno = 2048;
+        Integer vacio = 0;
         Boolean control = true;
         for(int i = 0; i < memoria.getTamaño()/16; i++){
             for(int j = 0; j < 16; j++){
                 if(mapa.getMapa_de_bits()[i][j]==0 && control){
                     huecos++;
                     control = false;
+                    iniciox=16*i + j;
+                    finy=16*i + j;
+                    if(inicioy!=0 || finy!=0){
+                        Object[] miTabla = new Object[5];
+                        miTabla[0] = tick;
+                        miTabla[1]=memoria.getMemoria()[iniciox-1].getProceso().getPid();
+                        miTabla[2]=inicioy;
+                        miTabla[3]=finy;
+                        miTabla[4]="Lleno";
+                        modelomem.addRow(miTabla);
+                        vermemoria.tbMemoria.setModel(modelomem);
+                        lleno = lleno + finy - inicioy;
+                    }
                 }
                 if(mapa.getMapa_de_bits()[i][j]==1 && !control){
                     control = true;
+                    Object[] miTabla = new Object[5];
+                    finx=16*i + j;
+                    inicioy=16*i + j;
+                    miTabla[0]=tick;
+                    miTabla[1]="-";
+                    miTabla[2]=iniciox;
+                    miTabla[3]=finx;
+                    miTabla[4]="Vacío";
+                    modelomem.addRow(miTabla);
+                    vermemoria.tbMemoria.setModel(modelomem);
+                    vacio = vacio + finx - iniciox;
                 }
             }
         }
+        Object[] miTabla = new Object[5];
+        miTabla[0]=tick;
+        miTabla[1]="Sistema Operativo";
+        miTabla[2]=2048;
+        miTabla[3]=4096;
+        miTabla[4]="Lleno";
+        modelomem.addRow(miTabla);
+        vermemoria.tbMemoria.setModel(modelomem);
+        
+        Object[] miTabla2 = new Object[3];
+        miTabla2[0]=tick;
+        miTabla2[1]=vacio;
+        miTabla2[2]=lleno;
+        modelocap.addRow(miTabla2);
+        vermemoria.tbCapacidad.setModel(modelocap);
         
         return huecos; 
     }

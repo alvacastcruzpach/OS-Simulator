@@ -8,7 +8,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  *
  * @author Andy
  */
-public class PintarFilas extends DefaultTableCellRenderer {
+public class PintarFilasMemoria extends DefaultTableCellRenderer {
     
    @Override
    public Component getTableCellRendererComponent(JTable table, Object value, boolean Selected, boolean hasFocus, int row, int col){
@@ -28,31 +28,18 @@ public class PintarFilas extends DefaultTableCellRenderer {
        
        }
                */
-       if(table.getValueAt(row,2).toString().equals("Listo")){
+       if(table.getValueAt(row,4).toString().equals("Lleno")){
            setBackground(Color.CYAN);
            setForeground(Color.BLACK);
            
        }else{
-           if(table.getValueAt(row,2).toString().equals("En ejecución")){
-              setBackground(Color.YELLOW);
+              setBackground(Color.WHITE);
               setForeground(Color.BLACK);
-           }else{
-               if(table.getValueAt(row,2).toString().equals("Nuevo")){
-                   setBackground(Color.GRAY);
-                   setForeground(Color.WHITE);
-               }else{
-                   if(table.getValueAt(row,2).toString().equals("Terminado")){
-                       setBackground(Color.GREEN);
-                       setForeground(Color.BLACK);
-                   }else{
-                       setBackground(Color.RED);
-                       setForeground(Color.WHITE);
-                   }
-               }
-               
+           
            }
            
-       }
+       
+      
        
        return this;
    }

@@ -21,18 +21,25 @@ public class AdministradorErrores {
         if(proceso.getPcb().getCondicion()=="Errado"){
             proceso.getPcb().setEstado("Terminado");
             proceso.getPcb().setTick_de_fin(tick);
-            Object[] miTabla = new Object[11];
-            miTabla[0]=tick;
-            miTabla[1]=proceso.getPid();
-            miTabla[2]=proceso.getPcb().getEstado();
-            miTabla[3]=proceso.getPcb().getPrioridad();
-            miTabla[4]=proceso.getPcb().getTick_de_llegada();
-            miTabla[5]=proceso.getBurst_time();
-            miTabla[6]=proceso.getPcb().getTamaño();
-            miTabla[7]=proceso.getPcb().getNumero_interrupciones();
-            miTabla[8]=proceso.getPcb().getCondicion();
-            miTabla[9]=proceso.getPcb().getDireccion_inicial();
-            miTabla[10]=proceso.getPcb().getProgram_counter();
+            Object[] miTabla = new Object[13];
+            miTabla[0]=proceso.getCorrida();
+            miTabla[1]=tick;
+            miTabla[2]=proceso.getPid();
+            miTabla[3]=proceso.getPcb().getEstado();
+            miTabla[4]=proceso.getPcb().getPrioridad();
+            miTabla[5]=proceso.getPcb().getTick_de_llegada();
+            miTabla[6]=proceso.getBurst_time();
+            miTabla[7]=proceso.getPcb().getTamaño();
+            miTabla[8]=proceso.getPcb().getNumero_interrupciones();
+            miTabla[9]=proceso.getPcb().getCondicion();
+            miTabla[10]=proceso.getPcb().getDireccion_inicial();
+            Integer fin1 = null;
+            if(proceso.getPcb().getDireccion_inicial()!=null){
+                fin1 = (Integer) proceso.getPcb().getDireccion_inicial() + (Integer) proceso.getPcb().getTamaño();
+                miTabla[11]= fin1;
+            }
+            miTabla[11] = fin1;
+            miTabla[12]=proceso.getPcb().getProgram_counter();
             modelo.addRow(miTabla);
             verprocesos.tbColaProcesos.setModel(modelo);
         }

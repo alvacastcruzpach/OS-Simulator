@@ -11,6 +11,7 @@
  */
 
 public class Proceso {
+    private Integer corrida;
     private Integer pid;
     private Integer burst_time;
     private PCB pcb;
@@ -47,6 +48,14 @@ public class Proceso {
 
     public void setPcb(PCB pcb) {
         this.pcb = pcb;
+    }
+
+    public Integer getCorrida() {
+        return corrida;
+    }
+
+    public void setCorrida(Integer corrida) {
+        this.corrida = corrida;
     }
     
 }

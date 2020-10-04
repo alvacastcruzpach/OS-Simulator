@@ -16,13 +16,15 @@ public class Interrupciones {
     private Integer time;
     private Proceso proceso;
     private String  descripcion;
+    private Integer prioridad;
 
-    public Interrupciones(Integer codigo, Integer tick, String estado, Integer time, Proceso proceso) {
+    public Interrupciones(Integer codigo, Integer tick, String estado, Integer time, Proceso proceso, Integer prioridad) {
         this.codigo = codigo;
         this.tick = tick;
         this.estado = estado;
         this.time = time;
         this.proceso = proceso;
+        this.prioridad = prioridad;
     }
 
     public Integer getCodigo() {
@@ -68,11 +70,17 @@ public class Interrupciones {
     public String getDescripcion() {
         return descripcion;
     }
-    
-    
+
+    public Integer getPrioridad() {
+        return prioridad;
+    }
+
+    public void setPrioridad(Integer prioridad) {
+        this.prioridad = prioridad;
+    }
     
     public void PendienteACompletado(VerInterrupciones interrupciones, DefaultTableModel modeloint, Integer tick){
-        if (this.time == 0){
+        if (this.time <= 0){
             this.estado = "Completado";
             Object[] miTabla = new Object[6];
             miTabla[0]=tick;

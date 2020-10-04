@@ -20,6 +20,7 @@ public class PCB {
     private Double porcentaje_segmento_datos;
     private Double porcentaje_variable;
     private Integer numero_interrupciones;
+    private Integer interrupciones;
     private String tipo;
     private Integer tick_de_fin;
     private Integer burst_time_inicial;
@@ -37,6 +38,7 @@ public class PCB {
         this.numero_interrupciones = interrupciones;
         this.tipo = tipo;
         this.burst_time_inicial = burst_time_inicial;
+        this.interrupciones = interrupciones;
     }
     
     public PCB() {
@@ -155,7 +157,21 @@ public class PCB {
         this.procesopadre = procesopadre;
     }
 
+    public Double getPorcentaje_variable() {
+        return porcentaje_variable;
+    }
 
+    public void setPorcentaje_variable(Double porcentaje_variable) {
+        this.porcentaje_variable = porcentaje_variable;
+    }
+
+    public Integer getInterrupciones() {
+        return interrupciones;
+    }
+
+    public void setInterrupciones(Integer interrupciones) {
+        this.interrupciones = interrupciones;
+    }
     
     
     

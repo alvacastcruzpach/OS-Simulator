@@ -1,6 +1,8 @@
 
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
@@ -11,18 +13,18 @@ import javax.swing.table.TableRowSorter;
  * and open the template in the editor.
  */
 
-
-
 /**
  *
  * @author Andy
  */
-public class Pantalla extends javax.swing.JFrame {
+public class Pantalla extends javax.swing.JFrame implements Runnable{
     Integer codigo = 0;
+    Integer corrida = 0;
     TableRowSorter trs;
     Estadistica estadistica = new Estadistica();
     VerInterrupciones interrupciones = new VerInterrupciones();
     VerProcesos verprocesos = new VerProcesos();
+    VerMemoria vermemoria = new VerMemoria();
     int valor=0;
     Integer prio;
     Integer burst;
@@ -34,36 +36,55 @@ public class Pantalla extends javax.swing.JFrame {
     CreadorProcesos creador = new CreadorProcesos(numero_procesos);
      
     ColaDeProcesos cola_procesos = new ColaDeProcesos(creador.CrearProcesos());
+    
+    //Thread hilo1;
+    //Thread hilo2;
+    public void inicio() throws InterruptedException{
+        corrida++;
         
-    public void inicio(){
+        for(int i = 0; i < cola_procesos.getCola_de_procesos().size(); i++){
+            cola_procesos.getCola_de_procesos().get(i).setCorrida(corrida);
+        }
        
         /* this.tick = 0;
         this.numero_procesos = 20;
         this.creador = new CreadorProcesos(numero_procesos);
         this.cola_procesos = new ColaDeProcesos(creador.CrearProcesos());
-        */    
-        
+           
+        hilo1 = new Thread(this);
+        hilo2 = new Thread(this);
+        hilo1.start();
+        hilo2.start();
+        */ 
         DefaultTableModel modelo=(DefaultTableModel) verprocesos.tbColaProcesos.getModel();
         DefaultTableModel modeloint=(DefaultTableModel) interrupciones.tbInterrupciones.getModel();
+        DefaultTableModel modelomem = (DefaultTableModel) vermemoria.tbMemoria.getModel();
+        DefaultTableModel modelocap = (DefaultTableModel) vermemoria.tbCapacidad.getModel();
         
         //PROCESOS NUEVOS EN TICK 0
         for(int xe=0; xe < cola_procesos.getCola_de_procesos().size(); xe++){ 
             if(cola_procesos.getCola_de_procesos().get(xe).getPcb().getTick_de_llegada()<= tick && cola_procesos.getCola_de_procesos().get(xe).getPcb().getEstado() == "Nuevo"){
-                Object[] miTabla = new Object[12];
+                Object[] miTabla = new Object[13];
 
-                miTabla[0]=tick;
-                miTabla[1]=cola_procesos.getCola_de_procesos().get(xe).getPid();
-                miTabla[2]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getEstado();
-                miTabla[3]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getPrioridad();
-                miTabla[4]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getTick_de_llegada();
-                miTabla[5]=cola_procesos.getCola_de_procesos().get(xe).getBurst_time();
-                miTabla[6]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getTamaño();
-                miTabla[7]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getNumero_interrupciones();
-                miTabla[8]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getCondicion();
-                miTabla[9]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial();
-                Integer fin = cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial() + cola_procesos.getCola_de_procesos().get(xe).getPcb().getTamaño();
-                miTabla[10]= fin;
-                miTabla[11]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getProgram_counter();
+                miTabla[0]=cola_procesos.getCola_de_procesos().get(xe).getCorrida();
+                miTabla[1]=tick;
+                miTabla[2]=cola_procesos.getCola_de_procesos().get(xe).getPid();
+                miTabla[3]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getEstado();
+                miTabla[4]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getPrioridad();
+                miTabla[5]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getTick_de_llegada();
+                miTabla[6]=cola_procesos.getCola_de_procesos().get(xe).getBurst_time();
+                miTabla[7]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getTamaño();
+                miTabla[8]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getNumero_interrupciones();
+                miTabla[9]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getCondicion();
+                miTabla[10]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial();
+                //Integer fin =cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial() + cola_procesos.getCola_de_procesos().get(xe).getPcb().getTamaño();
+                Integer fin = null;
+                if(cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial()!=null){
+                    fin = (Integer) cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial() + (Integer) cola_procesos.getCola_de_procesos().get(xe).getPcb().getTamaño();
+                    miTabla[11]= fin;
+                }
+                miTabla[11] = fin;
+                miTabla[12]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getProgram_counter();
 
                 modelo.addRow(miTabla);
                 verprocesos.tbColaProcesos.setModel(modelo);  
@@ -76,21 +97,26 @@ public class Pantalla extends javax.swing.JFrame {
         //PROCESOS EN LISTO EN TICK 0
         for(int xe=0; xe < cola_procesos.getCola_de_procesos().size(); xe++){ 
             if(cola_procesos.getCola_de_procesos().get(xe).getPcb().getTick_de_llegada()<= tick && cola_procesos.getCola_de_procesos().get(xe).getPcb().getEstado() == "Listo"){
-                Object[] miTabla = new Object[12];
-
-                miTabla[0]=tick;
-                miTabla[1]=cola_procesos.getCola_de_procesos().get(xe).getPid();
-                miTabla[2]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getEstado();
-                miTabla[3]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getPrioridad();
-                miTabla[4]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getTick_de_llegada();
-                miTabla[5]=cola_procesos.getCola_de_procesos().get(xe).getBurst_time();
-                miTabla[6]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getTamaño();
-                miTabla[7]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getNumero_interrupciones();
-                miTabla[8]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getCondicion();
-                miTabla[9]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial();
-                Integer fin = cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial() + cola_procesos.getCola_de_procesos().get(xe).getPcb().getTamaño();
-                miTabla[10]= fin;
-                miTabla[11]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getProgram_counter();
+                Object[] miTabla = new Object[13];
+                
+                miTabla[0]=cola_procesos.getCola_de_procesos().get(xe).getCorrida();
+                miTabla[1]=tick;
+                miTabla[2]=cola_procesos.getCola_de_procesos().get(xe).getPid();
+                miTabla[3]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getEstado();
+                miTabla[4]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getPrioridad();
+                miTabla[5]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getTick_de_llegada();
+                miTabla[6]=cola_procesos.getCola_de_procesos().get(xe).getBurst_time();
+                miTabla[7]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getTamaño();
+                miTabla[8]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getNumero_interrupciones();
+                miTabla[9]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getCondicion();
+                miTabla[10]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial();
+                Integer fin = null;
+                if(cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial()!=null){
+                    fin = (Integer) cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial() + (Integer) cola_procesos.getCola_de_procesos().get(xe).getPcb().getTamaño();
+                    miTabla[11]= fin;
+                }
+                miTabla[11] = fin;
+                miTabla[12]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getProgram_counter();
 
                 modelo.addRow(miTabla);
                 verprocesos.tbColaProcesos.setModel(modelo);  
@@ -132,13 +158,52 @@ public class Pantalla extends javax.swing.JFrame {
         
         CPU procesador = new CPU();
         ArrayList<Interrupciones> cola_interrupciones = new ArrayList<>();
-        Interrupciones interrupcion1 = new Interrupciones(1, 0, "Completado", 0, ProcesoEnEjecucion);
+        Interrupciones interrupcion1 = new Interrupciones(1, 0, "Completado", 0, ProcesoEnEjecucion, 0);
         cola_interrupciones.add(interrupcion1);
         AdministradorDeInterrupciones admininterrupciones = new AdministradorDeInterrupciones();
         admininterrupciones.setCola_interrupciones(cola_interrupciones);
         
-     
-       for(int i = 0; i < valor; i++){
+        
+        //CREACIÓN DE DISPOSITIVOS
+        
+        DispositivoES Teclado;
+        Teclado = new DispositivoES(9, "Teclado");
+        DispositivoES CD = new DispositivoES(14, "CD-ROM");
+        DispositivoES Impresora = new DispositivoES(15, "Impresora");
+        DispositivoES Mouse = new DispositivoES(116, "Mouse");
+        DispositivoES Disco = new DispositivoES(118, "Disco Duro");
+        
+        //CREACIÓN DE CONTROLADORES
+        
+        Controlador ConTeclado = new Controlador(9, Teclado, cola_interrupciones);
+        Controlador ConCD = new Controlador(14, CD, cola_interrupciones);
+        Controlador ConImpresora = new Controlador(15, Impresora, cola_interrupciones);
+        Controlador ConMouse = new Controlador(116, Mouse, cola_interrupciones);
+        Controlador ConDisco = new Controlador(118, Disco, cola_interrupciones);
+
+        //CREACIÓN DE PLANIFICADORES
+        
+        Planificador_Interrupciones PlanTeclado = new Planificador_Interrupciones(Planificador1.getEsquema(), Planificador1.getPolitica(), Planificador1.getQuantum(), ConTeclado);
+        Planificador_Interrupciones PlanCD = new Planificador_Interrupciones(Planificador1.getEsquema(), Planificador1.getPolitica(), Planificador1.getQuantum(), ConCD);
+        Planificador_Interrupciones PlanImpresora = new Planificador_Interrupciones(Planificador1.getEsquema(), Planificador1.getPolitica(), Planificador1.getQuantum(), ConImpresora);
+        Planificador_Interrupciones PlanMouse = new Planificador_Interrupciones(Planificador1.getEsquema(), Planificador1.getPolitica(), Planificador1.getQuantum(), ConMouse);
+        Planificador_Interrupciones PlanDisco = new Planificador_Interrupciones(Planificador1.getEsquema(), Planificador1.getPolitica(), Planificador1.getQuantum(), ConDisco);   
+        
+        //Enlazando Planificador a Controlador
+        ConTeclado.setPlanificador(PlanTeclado);
+        ConCD.setPlanificador(PlanCD);
+        ConImpresora.setPlanificador(PlanImpresora);
+        ConMouse.setPlanificador(PlanMouse);
+        ConDisco.setPlanificador(PlanDisco);
+        
+        //Enlazando Controlador con Administrador de Interrupciones
+        admininterrupciones.setConCD(ConCD);
+        admininterrupciones.setConTeclado(ConTeclado);
+        admininterrupciones.setConImpresora(ConImpresora);
+        admininterrupciones.setConMouse(ConMouse);
+        admininterrupciones.setConDisco(ConDisco);
+        
+        for(int i = 0; i < valor; i++){
             cola_procesos.getCola_de_procesos().add(creador.CrearProcesoManual(numero_procesos + 1,prio,burst,memo));
             numero_procesos++;
         }
@@ -155,32 +220,33 @@ public class Pantalla extends javax.swing.JFrame {
             } catch (InterruptedException e) {
                 System.out.println("error en delay");
             }*/
-            statsm.setHuecos(adminmemoria.contarHuecos(mapa_bits, MemoriaRAM)+statsm.getHuecos());
+            cola_procesos.pausar();
+            statsm.setHuecos(adminmemoria.contarHuecos(vermemoria, modelomem, modelocap, mapa_bits, MemoriaRAM, tick)+statsm.getHuecos());
             //DefaultTableModel modelo=(DefaultTableModel) verprocesos.tbColaProcesos.getModel();
             
             //ESTADO DE LOS PROCESOS NUEVOS AL INICIAR EL TICK VARIABLE
             for(int xe=0; xe < cola_procesos.getCola_de_procesos().size(); xe++){ 
                 if(cola_procesos.getCola_de_procesos().get(xe).getPcb().getTick_de_llegada()<= tick && cola_procesos.getCola_de_procesos().get(xe).getPcb().getEstado() == "Nuevo"){
-                    Object[] miTabla = new Object[12];
+                    Object[] miTabla = new Object[13];
 
-
-                    miTabla[0]=tick;
-                    miTabla[1]=cola_procesos.getCola_de_procesos().get(xe).getPid();
-                    miTabla[2]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getEstado();
-                    miTabla[3]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getPrioridad();
-                    miTabla[4]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getTick_de_llegada();
-                    miTabla[5]=cola_procesos.getCola_de_procesos().get(xe).getBurst_time();
-                    miTabla[6]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getTamaño();
-                    miTabla[7]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getNumero_interrupciones();
-                    miTabla[8]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getCondicion();
-                    miTabla[9]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial();
+                    miTabla[0]=cola_procesos.getCola_de_procesos().get(xe).getCorrida();
+                    miTabla[1]=tick;
+                    miTabla[2]=cola_procesos.getCola_de_procesos().get(xe).getPid();
+                    miTabla[3]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getEstado();
+                    miTabla[4]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getPrioridad();
+                    miTabla[5]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getTick_de_llegada();
+                    miTabla[6]=cola_procesos.getCola_de_procesos().get(xe).getBurst_time();
+                    miTabla[7]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getTamaño();
+                    miTabla[8]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getNumero_interrupciones();
+                    miTabla[9]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getCondicion();
+                    miTabla[10]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial();
                     Integer fin = null;
                     if(cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial()!=null){
                         fin = (Integer) cola_procesos.getCola_de_procesos().get(xe).getPcb().getDireccion_inicial() + (Integer) cola_procesos.getCola_de_procesos().get(xe).getPcb().getTamaño();
-                        miTabla[10]= fin;
+                        miTabla[11]= fin;
                     }
-                    miTabla[10] = fin;
-                    miTabla[11]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getProgram_counter();
+                    miTabla[11] = fin;
+                    miTabla[12]=cola_procesos.getCola_de_procesos().get(xe).getPcb().getProgram_counter();
 
                     modelo.addRow(miTabla);
                     verprocesos.tbColaProcesos.setModel(modelo);  
@@ -210,7 +276,7 @@ public class Pantalla extends javax.swing.JFrame {
             busqueda = adminmemoria.asignarMemoriaCola(verprocesos, modelo, mapa_bits, MemoriaRAM, cola_procesos, tick);
             statsm.setBusqueda(statsm.getBusqueda()+busqueda[0]);
             statsm.setNbusqueda(statsm.getNbusqueda()+busqueda[1]);
-            if(ProcesoEnEjecucion.getPcb().getEstado() != "Terminado" && Planificador1.getEsquema()=="No expropiativo"){
+            if((ProcesoEnEjecucion.getPcb().getEstado() == "En Ejecución" || ProcesoEnEjecucion.getPcb().getEstado() == "Listo") && Planificador1.getEsquema()=="No expropiativo"){
                 //El proceso en ejecucion sigue ejecutándose
                 if(ProcesoEnEjecucion.getPcb().getEstado() == "Bloqueado"){
                     statsp.setTiempo_desperdiciado(statsp.getTiempo_desperdiciado()+1);
@@ -267,8 +333,10 @@ public class Pantalla extends javax.swing.JFrame {
             
             
         }
-        PintarFilas pintarfilas=new PintarFilas();
-        verprocesos.tbColaProcesos.setDefaultRenderer(verprocesos.tbColaProcesos.getColumnClass(0),pintarfilas);
+        PintarFilasProcesos pintarfilasprocesos=new PintarFilasProcesos();
+        PintarFilasMemoria pintarfilasmemoria= new PintarFilasMemoria();
+        verprocesos.tbColaProcesos.setDefaultRenderer(verprocesos.tbColaProcesos.getColumnClass(0),pintarfilasprocesos);
+        vermemoria.tbMemoria.setDefaultRenderer(vermemoria.tbMemoria.getColumnClass(0),pintarfilasmemoria);
        
     
         statsp.imprimirUsodeCPU();
@@ -345,10 +413,9 @@ public class Pantalla extends javax.swing.JFrame {
         this.tick = 0;
         this.interrupciones = new VerInterrupciones();
         this.verprocesos=new VerProcesos();
+        this.vermemoria = new VerMemoria();
         this.numero_procesos = 20;
-        this.creador = new CreadorProcesos(numero_procesos);
-        this.cola_procesos = new ColaDeProcesos(creador.CrearProcesos());
-        
+        cola_procesos.ReiniciarValores();
     }
   
     @SuppressWarnings("unchecked")
@@ -384,6 +451,7 @@ public class Pantalla extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         vQuantum = new javax.swing.JSpinner();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -591,9 +659,9 @@ public class Pantalla extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel3)
                 .addGap(23, 23, 23)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel9)
-                    .addComponent(comboPolitica, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(comboPolitica, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(vQuantum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -610,6 +678,13 @@ public class Pantalla extends javax.swing.JFrame {
                     .addComponent(comboMemoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(44, Short.MAX_VALUE))
         );
+
+        jButton1.setText("Ver Memoria");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -633,7 +708,8 @@ public class Pantalla extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnVerProcesos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnInterrupciones, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnSimular, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(btnSimular, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addGap(55, 55, 55))
         );
         jPanel1Layout.setVerticalGroup(
@@ -649,7 +725,9 @@ public class Pantalla extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(btnEstadisticas)
                         .addGap(18, 18, 18)
-                        .addComponent(btnInterrupciones))
+                        .addComponent(btnInterrupciones)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton1))
                     .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -701,12 +779,13 @@ public class Pantalla extends javax.swing.JFrame {
        if(this.codigo != 0){
             limpiar();
         }
-        inicio();
+        try {
+            inicio();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Pantalla.class.getName()).log(Level.SEVERE, null, ex);
+        }
         JOptionPane.showMessageDialog(null, "Simulacion exitosa");
         this.codigo++;
-     
-        
-        
     }//GEN-LAST:event_btnSimularActionPerformed
 
   
@@ -744,6 +823,10 @@ public class Pantalla extends javax.swing.JFrame {
         
         verprocesos.setVisible(true);
     }//GEN-LAST:event_btnVerProcesosActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        vermemoria.setVisible(true);
+    }//GEN-LAST:event_jButton1ActionPerformed
 
 
           
@@ -789,6 +872,7 @@ public class Pantalla extends javax.swing.JFrame {
     private javax.swing.JComboBox comboExpropiativo;
     public javax.swing.JComboBox comboMemoria;
     public javax.swing.JComboBox comboPolitica;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -811,4 +895,9 @@ public class Pantalla extends javax.swing.JFrame {
     public javax.swing.JTextField txtPrioridad;
     private javax.swing.JSpinner vQuantum;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void run() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

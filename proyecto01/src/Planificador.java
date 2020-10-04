@@ -54,7 +54,7 @@ public class Planificador {
                 if(Cola == null){
                     System.out.println("Cola vacía");
                 }
-                Integer menor_tick_de_llegada = 201;
+                Integer menor_tick_de_llegada = 100001;
                 for (int j = 0; j < Cola.getCola_de_listos().size(); j++) {
                     if (Cola.getCola_de_listos().get(j).getBurst_time() != 0 && (Cola.getCola_de_listos().get(j).getPcb().getTick_de_llegada() < menor_tick_de_llegada) && (Cola.getCola_de_listos().get(j).getPcb().getTick_de_llegada() <= tick)&&(Cola.getCola_de_listos().get(j).getPcb().getEstado()=="Listo" || Cola.getCola_de_listos().get(j).getPcb().getEstado()=="En ejecución")) {
                         menor_tick_de_llegada = Cola.getCola_de_listos().get(j).getPcb().getTick_de_llegada();
@@ -67,7 +67,7 @@ public class Planificador {
                 if(Cola == null){
                     System.out.println("Cola vacía");
                 }
-                menor_tick_de_llegada = 201;
+                menor_tick_de_llegada = 100001;
                 for (int j = 0; j < Cola.getCola_de_listos().size(); j++) {
                     if (Cola.getCola_de_listos().get(j).getBurst_time() != 0 && (Cola.getCola_de_listos().get(j).getBurst_time() < menor_tick_de_llegada) && (Cola.getCola_de_listos().get(j).getPcb().getTick_de_llegada() <= tick)&&(Cola.getCola_de_listos().get(j).getPcb().getEstado()=="Listo" || Cola.getCola_de_listos().get(j).getPcb().getEstado()=="En ejecución")) {
                         menor_tick_de_llegada = Cola.getCola_de_listos().get(j).getBurst_time();
@@ -81,7 +81,7 @@ public class Planificador {
                 if(Cola == null){
                     System.out.println("Cola vacía");
                 }
-                menor_tick_de_llegada = 201;
+                menor_tick_de_llegada = 100001;
                 for (int j = 0; j < Cola.getCola_de_listos().size(); j++) {
                     if(this.Quantum < 1){
                         if(Cola.getCola_de_listos().size()>0){
@@ -104,7 +104,7 @@ public class Planificador {
                 if(Cola == null){
                     System.out.println("Cola vacía");
                 }
-                menor_tick_de_llegada = 201;
+                menor_tick_de_llegada = 100001;
                 Integer max_prioridad=0;
                 for (int j = 0; j < Cola.getCola_de_listos().size(); j++) {
                     if (Cola.getCola_de_listos().get(j).getBurst_time() != 0 && (Cola.getCola_de_listos().get(j).getPcb().getPrioridad()>max_prioridad) && (Cola.getCola_de_listos().get(j).getPcb().getTick_de_llegada()<=tick) && (Cola.getCola_de_listos().get(j).getPcb().getEstado()=="Listo" || Cola.getCola_de_listos().get(j).getPcb().getEstado()=="En ejecución")){
@@ -131,24 +131,25 @@ public class Planificador {
         if (proceso.getBurst_time() == 0){
             proceso.getPcb().setEstado("Terminado");
             proceso.getPcb().setTick_de_fin(tick);
-            Object[] miTabla = new Object[12];
-            miTabla[0]=tick;
-            miTabla[1]=proceso.getPid();
-            miTabla[2]=proceso.getPcb().getEstado();
-            miTabla[3]=proceso.getPcb().getPrioridad();
-            miTabla[4]=proceso.getPcb().getTick_de_llegada();
-            miTabla[5]=proceso.getBurst_time();
-            miTabla[6]=proceso.getPcb().getTamaño();
-            miTabla[7]=proceso.getPcb().getNumero_interrupciones();
-            miTabla[8]=proceso.getPcb().getCondicion();
-            miTabla[9]=proceso.getPcb().getDireccion_inicial();
+            Object[] miTabla = new Object[13];
+            miTabla[0]=proceso.getCorrida();
+            miTabla[1]=tick;
+            miTabla[2]=proceso.getPid();
+            miTabla[3]=proceso.getPcb().getEstado();
+            miTabla[4]=proceso.getPcb().getPrioridad();
+            miTabla[5]=proceso.getPcb().getTick_de_llegada();
+            miTabla[6]=proceso.getBurst_time();
+            miTabla[7]=proceso.getPcb().getTamaño();
+            miTabla[8]=proceso.getPcb().getNumero_interrupciones();
+            miTabla[9]=proceso.getPcb().getCondicion();
+            miTabla[10]=proceso.getPcb().getDireccion_inicial();
             Integer fin1 = null;
             if(proceso.getPcb().getDireccion_inicial()!=null){
                 fin1 = (Integer) proceso.getPcb().getDireccion_inicial() + (Integer) proceso.getPcb().getTamaño();
-                miTabla[10]= fin1;
+                miTabla[11]= fin1;
             }
-            miTabla[10] = fin1;
-            miTabla[11]=proceso.getPcb().getProgram_counter();
+            miTabla[11] = fin1;
+            miTabla[12]=proceso.getPcb().getProgram_counter();
             modelo.addRow(miTabla);
             verprocesos.tbColaProcesos.setModel(modelo);
         }else{

@@ -59,7 +59,9 @@ public class CPU {
         if(codigos[codigo]==0 || codigos[codigo] == 4 || codigos[codigo] ==8){
             time = 1;
         }
-        Interrupciones interrupcion = new Interrupciones(codigos[codigo], tick, estado, time, proceso);
+        Integer prioridad = (int)((Math.random()*4) + 1);
+        Interrupciones interrupcion = new Interrupciones(codigos[codigo], tick, estado, time, proceso, prioridad);
+        //IF interrupcion.codigo = 9, entonces LANZAR VENTANA EMERGENTE
         interrupcion.Descripcion();
         Object[] miTablaInt = new Object[6];
             miTablaInt[0]=tick;
@@ -76,24 +78,25 @@ public class CPU {
         this.copiarProcesoHijoenPadre(proceso.getPcb().getProcesohijo());
         proceso.getPcb().setProgram_counter(program_counter + 1);
         proceso.getPcb().setEstado("Bloqueado");
-        Object[] miTabla = new Object[12];
-        miTabla[0]=tick;
-        miTabla[1]=proceso.getPid();
-        miTabla[2]=proceso.getPcb().getEstado();
-        miTabla[3]=proceso.getPcb().getPrioridad();
-        miTabla[4]=proceso.getPcb().getTick_de_llegada();
-        miTabla[5]=proceso.getBurst_time();
-        miTabla[6]=proceso.getPcb().getTamaño();
-        miTabla[7]=proceso.getPcb().getNumero_interrupciones();
-        miTabla[8]=proceso.getPcb().getCondicion();
-        miTabla[9]=proceso.getPcb().getDireccion_inicial();
+        Object[] miTabla = new Object[13];
+        miTabla[0]=proceso.getCorrida();
+        miTabla[1]=tick;
+        miTabla[2]=proceso.getPid();
+        miTabla[3]=proceso.getPcb().getEstado();
+        miTabla[4]=proceso.getPcb().getPrioridad();
+        miTabla[5]=proceso.getPcb().getTick_de_llegada();
+        miTabla[6]=proceso.getBurst_time();
+        miTabla[7]=proceso.getPcb().getTamaño();
+        miTabla[8]=proceso.getPcb().getNumero_interrupciones();
+        miTabla[9]=proceso.getPcb().getCondicion();
+        miTabla[10]=proceso.getPcb().getDireccion_inicial();
         Integer fin1 = null;
         if(proceso.getPcb().getDireccion_inicial()!=null){
             fin1 = (Integer) proceso.getPcb().getDireccion_inicial() + (Integer) proceso.getPcb().getTamaño();
-            miTabla[10]= fin1;
+            miTabla[11]= fin1;
         }
-        miTabla[10] = fin1;
-        miTabla[11]=proceso.getPcb().getProgram_counter();
+        miTabla[11] = fin1;
+        miTabla[12]=proceso.getPcb().getProgram_counter();
         modelo.addRow(miTabla);
         verprocesos.tbColaProcesos.setModel(modelo);
         return interrupcion;
